@@ -1,2 +1,2 @@
 # reshul-django
-Django Core Concepts
+Django Core Concept covefred
