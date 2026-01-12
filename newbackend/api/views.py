@@ -98,6 +98,22 @@ def get_book_list(request):
         'data': book_list
         })
 
+@api_view(['GET'])
+def get_book_by_id(request, book_id):
+     
+     for book in book_list:
+          if book['id'] == book_id:
+               return Response({
+                    'message':'Book found successfully',
+                    'data': book,
+                    'total':len(book_list)
+               }, status=status.HTTP_200_OK)
+    
+     return Response({
+          'error':'Book not found!',
+          'total':len(book_list)
+     }, status=status.HTTP_400_BAD_REQUEST) 
+
 
 @api_view(['POST'])
 def add_book(request):
