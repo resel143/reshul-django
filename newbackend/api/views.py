@@ -133,3 +133,44 @@ def add_book(request):
         },
         status=status.HTTP_201_CREATED
     )
+
+
+@api_view(['PATCH'])
+def update_book(request):
+    data = request.data
+
+    book_id = data.get('id')
+
+    if not book_id:
+            return Response({
+                'message': "Book ID is required!"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    for book in book_list:
+         if int(book_id) == book['id']:
+                book['title'] = str(data.get('title', book['title']))
+                book['author'] = str(data.get('author', data['author']))
+                book["published_date"] = data.get("published_date", book["published_date"])
+                book["genre"] = data.get("genre", book["genre"])
+                book["isbn"] = data.get("isbn", book["isbn"])
+                book["price"] = float(data.get("price", book["price"]))
+                book["rating"] = float(data.get("rating", book["rating"]))
+                book["pages"] = int(data.get("pages", book["pages"]))
+                book["language"] = data.get("language", book["language"])
+                book["publisher"] = data.get("publisher", book["publisher"])
+                book["available"] = bool(data.get("available", book["available"]))
+
+                return Response({
+                     'message': 'Book updated successfully',
+                     'data': book,
+                     'total': len(book_list)
+                },
+                    status=status.HTTP_200_OK
+                )
+    
+    return Response({
+         'error':'No Book Found!',
+    }, status=status.HTTP_404_NOT_FOUND)
+
