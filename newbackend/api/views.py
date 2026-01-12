@@ -114,6 +114,26 @@ def get_book_by_id(request, book_id):
           'total':len(book_list)
      }, status=status.HTTP_400_BAD_REQUEST) 
 
+@api_view(['GET'])
+def get_book_by_title(request, book_name):
+     
+     matching_book = [
+          book for book in book_list if book_name.lower() in book['title'].lower()
+     ]
+
+     if matching_book:
+          return Response({
+                    'message': f'{len(matching_book)} book(s) Found Successfully!',
+                    'total': len(book_list),
+                    'data': matching_book
+               }, status=status.HTTP_200_OK)
+          
+     return Response({
+          'error':'Book not found!',
+     }, status=status.HTTP_400_BAD_REQUEST)  
+          
+
+
 
 @api_view(['POST'])
 def add_book(request):
