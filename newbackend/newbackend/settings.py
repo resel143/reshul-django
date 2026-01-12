@@ -39,11 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',
-<<<<<<< HEAD:mybackend/mybackend/settings.py
     'corsheaders'
-=======
-    'corsheaders',
->>>>>>> d8b40bcae9e9b80639e7e076d668802c3c5ac1af:newbackend/newbackend/settings.py
 ]
 
 MIDDLEWARE = [
@@ -54,12 +50,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-<<<<<<< HEAD:mybackend/mybackend/settings.py
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware'
-=======
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
->>>>>>> d8b40bcae9e9b80639e7e076d668802c3c5ac1af:newbackend/newbackend/settings.py
 ]
 
 ROOT_URLCONF = 'newbackend.urls'
@@ -82,10 +74,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'newbackend.wsgi.application'
 CORS_ALLOW_ALL_ORIGINS = True
 
-<<<<<<< HEAD:mybackend/mybackend/settings.py
-CORS_ALLOW_ALL_ORIGINS = True 
-
-=======
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
@@ -103,7 +91,6 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
->>>>>>> d8b40bcae9e9b80639e7e076d668802c3c5ac1af:newbackend/newbackend/settings.py
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
