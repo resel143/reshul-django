@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 
 # Dummy data 
 book_list = [
@@ -96,3 +97,39 @@ def get_book_list(request):
         'status':200,
         'data': book_list
         })
+
+
+@api_view(['POST'])
+def add_book(request):
+    data = request.data
+
+    # Generate new ID safely
+    new_id = book_list[-1]["id"] + 1 if book_list else 1
+
+    # Create new book dict (JSON-safe)
+    new_book = {
+        "id": int(new_id),
+        "title": str(data.get("title", "")),
+        "author": str(data.get("author", "")),
+        "published_date": str(data.get("published_date", "")),
+        "genre": str(data.get("genre", "")),
+        "isbn": str(data.get("isbn", "")),
+        "price": float(data.get("price", 0)),
+        "rating": float(data.get("rating", 0)),
+        "pages": int(data.get("pages", 0)),
+        "language": str(data.get("language", "")),
+        "publisher": str(data.get("publisher", "")),
+        "available": bool(data.get("available", True))
+    }
+
+    # Append to global list
+    book_list.append(new_book)
+
+    return Response(
+        {
+            "message": "Book added successfully",
+            "data": new_book,
+            "total_books": len(book_list)
+        },
+        status=status.HTTP_201_CREATED
+    )
