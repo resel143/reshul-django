@@ -92,4 +92,7 @@ book_list = [
 
 @api_view(['GET'])
 def get_book_list(request):
-    return Response(book_list)
+    return Response({
+        'status':200,
+        'data': book_list
+        })
