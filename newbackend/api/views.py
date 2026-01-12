@@ -174,3 +174,30 @@ def update_book(request):
          'error':'No Book Found!',
     }, status=status.HTTP_404_NOT_FOUND)
 
+
+@api_view(['DELETE'])
+def delete_book(request):
+     data = request.data
+
+     book_id = data.get('id')
+
+     if not book_id:
+          return Response({
+               'error': 'Book does not exists!!'
+          }, status=status.HTTP_404_NOT_FOUND)
+     
+     for index, book in enumerate(book_list):
+          if int(book_id) == book['id']:
+               deleted_book = book_list.pop(index)
+
+               return Response({
+                    'message': 'Book deleted successfully!',
+                    'data': deleted_book,
+                    'total':len(book_list)
+               }, status=status.HTTP_200_OK)
+          
+    
+     return Response({
+         'error': 'Book not found!!',
+            'total': len(book_list)
+        }, status=status.HTTP_400_BAD_REQUEST)
