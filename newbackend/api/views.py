@@ -139,6 +139,8 @@ def get_book_by_title(request, book_name):
 def add_book(request):
     data = request.data
 
+    print(data)
+
     # Generate new ID safely
     new_id = book_list[-1]["id"] + 1 if book_list else 1
 
