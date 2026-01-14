@@ -2,6 +2,8 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from bson import ObjectId
+from .db import book_collection
 
 # Dummy data 
 book_list = [
@@ -93,33 +95,27 @@ book_list = [
 
 @api_view(['GET'])
 def get_book_list(request):
+    books = list(book_collection.find({}))
+    for book in books:
+         book['_id'] = str(book['_id'])
+
     return Response({
         'status':200,
-        'data': book_list
+        'data': books
         })
-
-@api_view(['GET'])
-def get_book_by_id(request, book_id):
-     
-     for book in book_list:
-          if book['id'] == book_id:
-               return Response({
-                    'message':'Book found successfully',
-                    'data': book,
-                    'total':len(book_list)
-               }, status=status.HTTP_200_OK)
-    
-     return Response({
-          'error':'Book not found!',
-          'total':len(book_list)
-     }, status=status.HTTP_400_BAD_REQUEST) 
 
 @api_view(['GET'])
 def get_book_by_title(request, book_name):
      
-     matching_book = [
-          book for book in book_list if book_name.lower() in book['title'].lower()
-     ]
+     
+     matching_book = list(
+          book_collection.find(
+               {'title': {'$regex': book_name, '$options':'i'}}
+          )
+     )
+
+     for book in matching_book:
+          book['_id'] = str(book['_id'])
 
      if matching_book:
           return Response({
@@ -133,20 +129,11 @@ def get_book_by_title(request, book_name):
      }, status=status.HTTP_400_BAD_REQUEST)  
           
 
-
-
 @api_view(['POST'])
 def add_book(request):
     data = request.data
 
-    print(data)
-
-    # Generate new ID safely
-    new_id = book_list[-1]["id"] + 1 if book_list else 1
-
-    # Create new book dict (JSON-safe)
     new_book = {
-        "id": int(new_id),
         "title": str(data.get("title", "")),
         "author": str(data.get("author", "")),
         "published_date": str(data.get("published_date", "")),
@@ -160,8 +147,9 @@ def add_book(request):
         "available": bool(data.get("available", True))
     }
 
-    # Append to global list
-    book_list.append(new_book)
+    result = book_collection.insert_one(new_book)
+
+    new_book['_id'] = str(result.inserted_id)
 
     return Response(
         {
@@ -176,66 +164,55 @@ def add_book(request):
 @api_view(['PATCH'])
 def update_book(request):
     data = request.data
-
-    book_id = data.get('id')
+    book_id = data.get('_id')
 
     if not book_id:
-            return Response({
-                'message': "Book ID is required!"
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    for book in book_list:
-         if int(book_id) == book['id']:
-                book['title'] = str(data.get('title', book['title']))
-                book['author'] = str(data.get('author', data['author']))
-                book["published_date"] = data.get("published_date", book["published_date"])
-                book["genre"] = data.get("genre", book["genre"])
-                book["isbn"] = data.get("isbn", book["isbn"])
-                book["price"] = float(data.get("price", book["price"]))
-                book["rating"] = float(data.get("rating", book["rating"]))
-                book["pages"] = int(data.get("pages", book["pages"]))
-                book["language"] = data.get("language", book["language"])
-                book["publisher"] = data.get("publisher", book["publisher"])
-                book["available"] = bool(data.get("available", book["available"]))
+        return Response({'error': 'Book ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-                return Response({
-                     'message': 'Book updated successfully',
-                     'data': book,
-                     'total': len(book_list)
-                },
-                    status=status.HTTP_200_OK
-                )
-    
+    # Only include allowed fields to update
+    allowed_fields = {
+        "title", "author", "published_date", "genre",
+        "isbn", "price", "rating", "pages",
+        "language", "publisher", "available"
+    }
+
+    update_fields = {field: data[field] for field in allowed_fields if field in data}
+
+    if not update_fields:
+        return Response({'message': 'No fields to update provided!'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update in MongoDB
+    result = book_collection.update_one({'_id': ObjectId(book_id)}, {'$set': update_fields})
+
+    if result.matched_count == 0:
+        return Response({'error': 'No Book Found!'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Fetch the updated document
+    book = book_collection.find_one({'_id': ObjectId(book_id)})
+
+    book['_id'] = str(book['_id'])
+
     return Response({
-         'error':'No Book Found!',
-    }, status=status.HTTP_404_NOT_FOUND)
-
+        'message': 'Book Updated',
+        'data': book,
+    }, status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
 def delete_book(request):
      data = request.data
 
-     book_id = data.get('id')
+     book_id = data.get('_id')
 
      if not book_id:
           return Response({
                'error': 'Book does not exists!!'
           }, status=status.HTTP_404_NOT_FOUND)
      
-     for index, book in enumerate(book_list):
-          if int(book_id) == book['id']:
-               deleted_book = book_list.pop(index)
+     result = book_collection.delete_one({'_id': ObjectId(book_id)})
 
-               return Response({
-                    'message': 'Book deleted successfully!',
-                    'data': deleted_book,
-                    'total':len(book_list)
-               }, status=status.HTTP_200_OK)
-          
+     if result.deleted_count == 0:
+        return Response({'error': 'Book not found!'}, status=status.HTTP_404_NOT_FOUND)
     
      return Response({
-         'error': 'Book not found!!',
-            'total': len(book_list)
-        }, status=status.HTTP_400_BAD_REQUEST)
+         'message': 'Book Deleted successfully',
+     }, status=status.HTTP_200_OK)
