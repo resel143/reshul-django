@@ -1,7 +1,7 @@
 # 📚 Library Management Backend (Django)
 
 A **backend-intensive Library Management System** built using **Django** and **Django REST Framework (DRF)**.  
-This repository contains **REST APIs**, database models, search logic, and backend architecture powering the Library Project.
+This repository contains all **REST APIs**, database models, search logic, and backend architecture powering the Library Project.
 
 The frontend for this project is built using **React.js** and is maintained in a separate repository.
 
