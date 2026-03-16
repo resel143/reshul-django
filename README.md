@@ -12,7 +12,7 @@ The frontend for this project is built using **React.js** and is maintained in a
 - **Python**
 - **Django**
 - **Django REST Framework**
-- SQLite (default, easily configurable to PostgreSQL)
+- SQLite (configurable to PostgreSQL)
 - RESTful API Architecture
 
 
